@@ -55,11 +55,55 @@ return false;
 
 ___TESTS___
 
-scenarios: []
+scenarios:
+- name: Valid IPv4
+  code: |-
+    const mockData = {
+      input_ip: '192.168.0.1'
+    };
+
+    // Call runCode to run the template's code.
+    let variableResult = runCode(mockData);
+
+    // Verify that the variable returns a result.
+    assertThat(variableResult).isEqualTo('192.168.0.0');
+- name: Valid IPv6
+  code: |-
+    const mockData = {
+      input_ip: 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff'
+    };
+
+    // Call runCode to run the template's code.
+    let variableResult = runCode(mockData);
+
+    // Verify that the variable returns a result.
+    assertThat(variableResult).isEqualTo('ffff:ffff:ffff:ffff:ffff:ffff:ffff::');
+- name: Invalid IPv4
+  code: |-
+    const mockData = {
+      input_ip: '300.168.0.1'
+    };
+
+    // Call runCode to run the template's code.
+    let variableResult = runCode(mockData);
+
+    // Verify that the variable returns a result.
+    assertThat(variableResult).isFalse();
+- name: Invalid string
+  code: |-
+    const mockData = {
+      input_ip: 'unicorn 192.168.0.1'
+    };
+
+    // Call runCode to run the template's code.
+    let variableResult = runCode(mockData);
+
+    // Verify that the variable returns a result.
+    assertThat(variableResult).isFalse();
 
 
 ___NOTES___
 
-Created on 28.8.2021, 18:46:41
+Created on 28.8.2021, 22:14:39
 
 
