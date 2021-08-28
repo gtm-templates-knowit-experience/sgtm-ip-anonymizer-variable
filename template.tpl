@@ -25,32 +25,105 @@ ___TEMPLATE_PARAMETERS___
 
 [
   {
-    "type": "TEXT",
-    "name": "input_ip",
-    "displayName": "Client IP Address",
+    "type": "CHECKBOX",
+    "name": "read_from_event_data",
+    "checkboxText": "Read Client IP from Event Data",
     "simpleValueType": true,
-    "valueHint": "127.0.0.1"
+    "help": "Reads the ip_override value from Event Data"
+  },
+  {
+    "type": "GROUP",
+    "name": "advanced_options",
+    "displayName": "Advanced Options",
+    "groupStyle": "ZIPPY_CLOSED",
+    "subParams": [
+      {
+        "type": "SELECT",
+        "name": "input_ip",
+        "displayName": "Client IP Address",
+        "macrosInSelect": true,
+        "selectItems": [],
+        "simpleValueType": true,
+        "help": "Provide any IP Address to be anonymized"
+      }
+    ],
+    "enablingConditions": [
+      {
+        "paramName": "read_from_event_data",
+        "paramValue": true,
+        "type": "NOT_EQUALS"
+      }
+    ]
   }
 ]
 
 
 ___SANDBOXED_JS_FOR_SERVER___
 
+const queryPermission = require('queryPermission');
+const getEventData = require('getEventData');
+
+const keyPath = 'ip_override';
 const input_ip = data.input_ip;
 
-// Check for valid IPv4
-const ipv4_regex = "^(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)){3}$";
+// Read from Event Data
+if(queryPermission('read_event_data', keyPath)){
+  const input_ip = data.input_ip ? data.input_ip : getEventData(keyPath);
+  
+  // Check for valid IPv4
+  const ipv4_regex = "^(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)){3}$";
 
-if(input_ip.match(ipv4_regex) !== null){
-   return input_ip.substring(0,input_ip.lastIndexOf('.')).concat('.0');
+  if(input_ip.match(ipv4_regex) !== null){
+     return input_ip.substring(0,input_ip.lastIndexOf('.')).concat('.0');
+  }
+  
+  //Check for valid IPv6
+  if(input_ip.match(":") !== null){
+     return input_ip.substring(0,input_ip.lastIndexOf(':')).concat('::');
+  }
+  
+  return false;
+  
 }
 
-//Check for valid IPv6
-if(input_ip.match(":") !== null){
- return input_ip.substring(0,input_ip.lastIndexOf(':')).concat('::');
-}
 
-return false;
+___SERVER_PERMISSIONS___
+
+[
+  {
+    "instance": {
+      "key": {
+        "publicId": "read_event_data",
+        "versionId": "1"
+      },
+      "param": [
+        {
+          "key": "keyPatterns",
+          "value": {
+            "type": 2,
+            "listItem": [
+              {
+                "type": 1,
+                "string": "ip_override"
+              }
+            ]
+          }
+        },
+        {
+          "key": "eventDataAccess",
+          "value": {
+            "type": 1,
+            "string": "specific"
+          }
+        }
+      ]
+    },
+    "clientAnnotations": {
+      "isEditedByUser": true
+    },
+    "isRequired": true
+  }
+]
 
 
 ___TESTS___
@@ -104,6 +177,6 @@ scenarios:
 
 ___NOTES___
 
-Created on 28.8.2021, 22:14:39
+Created on 28.8.2021, 22:55:41
 
 
