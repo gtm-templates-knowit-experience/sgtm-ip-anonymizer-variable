@@ -79,7 +79,10 @@ if(queryPermission('read_event_data', keyPath)){
   
   //Check for valid IPv6
   if(input_ip.match(":") !== null){
-     return input_ip.substring(0,input_ip.lastIndexOf(':')).concat('::');
+    const keep_bits = input_ip.split(':').slice(0,3);
+    const zero_bits = ["0000", "0000", "0000", "0000", "0000"]
+    
+    return keep_bits.concat(zero_bits).join(':')
   }
   
   return false;
