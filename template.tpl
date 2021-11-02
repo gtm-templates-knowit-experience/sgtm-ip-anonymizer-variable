@@ -80,7 +80,7 @@ if(queryPermission('read_event_data', keyPath)){
   //Check for valid IPv6
   if(input_ip.match(":") !== null){
     const keep_bits = input_ip.split(':').slice(0,3);
-    const zero_bits = ["0000", "0000", "0000", "0000", "0000"];
+    const zero_bits = ["0:0:0::"];
     
     return keep_bits.concat(zero_bits).join(':');
   }
@@ -153,7 +153,7 @@ scenarios:
     let variableResult = runCode(mockData);
 
     // Verify that the variable returns a result.
-    assertThat(variableResult).isEqualTo('ffff:ffff:ffff:0000:0000:0000:0000:0000');
+    assertThat(variableResult).isEqualTo('ffff:ffff:ffff:0:0:0::');
 - name: Invalid IPv4
   code: |-
     const mockData = {
